@@ -8,12 +8,14 @@
 </head>
 
 <body>
-
-    <!-- memeriksa pesan yang dikirim dari login -->
+    <!--logika pagination-->
     <?php
 
 
+
+    //looping data
     ?>
+
 
     <h2>Surat Masuk Biasa</h2>
     <br>
@@ -49,11 +51,6 @@
         <?php
         include 'koneksi.php';
 
-
-        //$query = mysqli_query (mysqli_connect($server, $username, $password, $database), "SELECT * FROM surat_biasa WHERE id_surat LIKE '%".$cari."%'");
-        //}else{
-
-        //}
         if (isset($_POST['cari'])) {
             $cari = $_POST['cari'];
             $query = mysqli_query(mysqli_connect($server, $username, $password, $database), "SELECT * FROM surat_biasa WHERE 
@@ -68,6 +65,39 @@
 
 
         }
+
+        //baris untuk pagination
+        //menyimpan url halaman saat ini dengan fungsi get
+        //misalnya kalian akan melihat ?halaman=3 pada url diatas maka 3 akan di simpan di var  halaman
+        $halaman = isset($_GET['halaman > 1']) ? (int) $_GET['halaman'] : 1;
+
+        //jika halaman lebih dari 1 maka halaman awal dikurangi 1 misal 5 - 1
+        //jika halaman lebih kecil dari 1 maka halaman diawali dari 0
+        $halaman_awal = ($halaman > 1) ? ($halaman * 3) - 3 : 0;
+
+        //include koneksi database
+
+        //jika previous dikurangi 1 dan jika next ditambah 1
+        $sebelum = $halaman - 1;
+        $setelah = $halaman + 1;
+
+        //mengambil data dari tabel pegawai untuk ditotal
+        #$query = mysqli_query(mysqli_connect($server, $username, $password, $database), "SELECT * FROM surat_biasa");
+
+
+        //jumlah surat ditotal dengan fungsi num_rows
+        $jumlah_data = mysqli_num_rows($query);
+
+        //pembulatan halaman menggunakan ceil
+        $total_halaman = ceil($jumlah_data / 10);
+
+        //query ambil data dari tabel surat untuk ditampilkan dgn fungsi limit
+        //satu halaman akan ditampilkan 5 data
+        $query = mysqli_query(mysqli_connect($server, $username, $password, $database), "SELECT * FROM surat_biasa limit $halaman_awal, 10");
+
+        //nomor digunakan untuk penomoran pada kolom no
+        //karena index dimulai dari angka 0 maka perlu ditambahkan 1
+        $nomor = $halaman_awal + 1;
 
         $no = 1;
         while ($ambil = mysqli_fetch_array($query)) { //ambil ini variabel bkn sendiri
@@ -93,9 +123,24 @@
         }
         ?>
 
-
-
     </table>
+
+    <!--bagian pagination-->
+    <ul>
+        <li>
+            <a <?php if ($halaman > 1) {
+                    echo " href='?halaman=$sebelum'";
+                } ?>>Previous</a>
+        </li>
+        <li><a href="?halaman=<?php $nomor; ?>"><?php echo $nomor; ?></a></li>
+        <li>
+            <a <?php if ($halaman < $total_halaman) {
+                    echo " href='?halaman=$setelah'";
+                } ?>>Next</a>
+        </li>
+    </ul>
+
+
 </body>
 
 </html>
